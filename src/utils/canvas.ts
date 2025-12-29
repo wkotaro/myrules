@@ -5,6 +5,7 @@ interface DrawOptions {
   rules: Rule[]
   backgroundColor: string
   textColor: string
+  backgroundImage?: HTMLImageElement | null
 }
 
 function wrapText(
@@ -39,25 +40,48 @@ export function drawWallpaper(
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  const { title, rules, backgroundColor, textColor } = options
+  const { title, rules, backgroundColor, textColor, backgroundImage } = options
   const width = WALLPAPER_WIDTH
   const height = WALLPAPER_HEIGHT
 
   canvas.width = width
   canvas.height = height
 
-  // Fill background
+  // Fill background color first
   ctx.fillStyle = backgroundColor
   ctx.fillRect(0, 0, width, height)
+
+  // Draw background image if provided (cover mode)
+  if (backgroundImage) {
+    const imgRatio = backgroundImage.width / backgroundImage.height
+    const canvasRatio = width / height
+    let drawWidth, drawHeight, drawX, drawY
+
+    if (imgRatio > canvasRatio) {
+      // Image is wider - fit height, crop width
+      drawHeight = height
+      drawWidth = height * imgRatio
+      drawX = (width - drawWidth) / 2
+      drawY = 0
+    } else {
+      // Image is taller - fit width, crop height
+      drawWidth = width
+      drawHeight = width / imgRatio
+      drawX = 0
+      drawY = (height - drawHeight) / 2
+    }
+
+    ctx.drawImage(backgroundImage, drawX, drawY, drawWidth, drawHeight)
+  }
 
   // Set text properties
   ctx.fillStyle = textColor
   ctx.textAlign = 'center'
 
-  // Draw title
+  // Draw title (positioned below iPhone lock screen clock)
   const titleFontSize = 90
   ctx.font = `bold ${titleFontSize}px system-ui, -apple-system, sans-serif`
-  const titleY = height * 0.18
+  const titleY = height * 0.35
   ctx.fillText(title.toUpperCase(), width / 2, titleY)
 
   // Draw rules

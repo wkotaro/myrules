@@ -7,6 +7,7 @@ interface UseWallpaperCanvasOptions {
   rules: Rule[]
   backgroundColor: string
   textColor: string
+  backgroundImage?: HTMLImageElement | null
 }
 
 export function useWallpaperCanvas(options: UseWallpaperCanvasOptions) {

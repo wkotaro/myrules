@@ -6,16 +6,19 @@ import { ColorPicker } from './components/ColorPicker'
 import { Preview } from './components/Preview'
 import { ExportButton } from './components/ExportButton'
 import { TitleEditor } from './components/TitleEditor'
+import { ImageUploader } from './components/ImageUploader'
 
 function App() {
   const [title, setTitle] = useState('My Rules')
   const [rules, setRules] = useState<Rule[]>(DEFAULT_RULES)
   const [backgroundColor, setBackgroundColor] = useState(PRESET_COLORS[0].bg)
   const [textColor, setTextColor] = useState(PRESET_COLORS[0].text)
+  const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null)
 
   const canvasOptions = useMemo(
-    () => ({ title, rules, backgroundColor, textColor }),
-    [title, rules, backgroundColor, textColor]
+    () => ({ title, rules, backgroundColor, textColor, backgroundImage }),
+    [title, rules, backgroundColor, textColor, backgroundImage]
   )
 
   const { canvasRef, download } = useWallpaperCanvas(canvasOptions)
@@ -58,6 +61,11 @@ function App() {
     setTextColor(text)
   }
 
+  const handleImageChange = (image: HTMLImageElement | null, dataUrl: string | null) => {
+    setBackgroundImage(image)
+    setBackgroundImageUrl(dataUrl)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 py-4">
@@ -83,6 +91,10 @@ function App() {
             <ColorPicker
               selectedBg={backgroundColor}
               onSelect={handleColorSelect}
+            />
+            <ImageUploader
+              currentImage={backgroundImageUrl}
+              onImageChange={handleImageChange}
             />
             <ExportButton onExport={download} />
           </div>
