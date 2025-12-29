@@ -126,7 +126,6 @@ function App() {
           {/* Editor Panel */}
           <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <TitleEditor title={title} onChange={setTitle} />
-            <PositionSelector position={titlePosition} onChange={setTitlePosition} />
             <RulesList
               rules={rules}
               onUpdate={handleUpdateRule}
@@ -135,16 +134,17 @@ function App() {
               onMoveUp={handleMoveUp}
               onMoveDown={handleMoveDown}
             />
-            <ColorPicker
-              selectedBg={backgroundColor}
-              onSelect={handleColorSelect}
-            />
+            <PositionSelector position={titlePosition} onChange={setTitlePosition} />
             <ImageUploader
               currentImageId={currentImageId}
               storedImages={storedImages}
               onImageSelect={handleImageSelect}
               onImageAdd={handleImageAdd}
               onImageRemove={handleImageRemove}
+            />
+            <ColorPicker
+              selectedBg={backgroundColor}
+              onSelect={handleColorSelect}
             />
             <ExportButton onExport={download} />
           </div>
