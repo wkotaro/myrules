@@ -6,24 +6,47 @@ import { ColorPicker } from './components/ColorPicker'
 import { Preview } from './components/Preview'
 import { ExportButton } from './components/ExportButton'
 import { TitleEditor } from './components/TitleEditor'
-import { ImageUploader } from './components/ImageUploader'
+import { ImageUploader, StoredImage } from './components/ImageUploader'
 
 function App() {
   const [title, setTitle] = useState('My Rules')
   const [rules, setRules] = useState<Rule[]>(DEFAULT_RULES)
   const [backgroundColor, setBackgroundColor] = useState(PRESET_COLORS[0].bg)
   const [textColor, setTextColor] = useState(PRESET_COLORS[0].text)
-  const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
-  const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null)
+  const [storedImages, setStoredImages] = useState<StoredImage[]>([])
+  const [currentImageId, setCurrentImageId] = useState<string | null>(null)
 
-  // Load default background image on mount
+  // Get current background image element
+  const backgroundImage = useMemo(() => {
+    if (!currentImageId) return null
+    return storedImages.find((img) => img.id === currentImageId)?.element ?? null
+  }, [currentImageId, storedImages])
+
+  // Load default background images on mount
   useEffect(() => {
-    const img = new Image()
-    img.onload = () => {
-      setBackgroundImage(img)
-      setBackgroundImageUrl('/iphone_sample.png')
-    }
-    img.src = '/iphone_sample.png'
+    const defaultImages = [
+      { id: 'default1', src: '/iphone_sample.png' },
+      { id: 'default2', src: '/iphone_sample2.png' },
+      { id: 'default3', src: '/iphone_sample3.png' },
+    ]
+
+    const loadedImages: StoredImage[] = []
+    let loadedCount = 0
+
+    defaultImages.forEach(({ id, src }) => {
+      const img = new Image()
+      img.onload = () => {
+        loadedImages.push({ id, dataUrl: src, element: img })
+        loadedCount++
+        if (loadedCount === defaultImages.length) {
+          // Sort to maintain order
+          loadedImages.sort((a, b) => a.id.localeCompare(b.id))
+          setStoredImages(loadedImages)
+          setCurrentImageId('default1')
+        }
+      }
+      img.src = src
+    })
   }, [])
 
   const canvasOptions = useMemo(
@@ -71,9 +94,19 @@ function App() {
     setTextColor(text)
   }
 
-  const handleImageChange = (image: HTMLImageElement | null, dataUrl: string | null) => {
-    setBackgroundImage(image)
-    setBackgroundImageUrl(dataUrl)
+  const handleImageSelect = (image: StoredImage | null) => {
+    setCurrentImageId(image?.id ?? null)
+  }
+
+  const handleImageAdd = (image: StoredImage) => {
+    setStoredImages((prev) => [...prev, image])
+  }
+
+  const handleImageRemove = (id: string) => {
+    setStoredImages((prev) => prev.filter((img) => img.id !== id))
+    if (currentImageId === id) {
+      setCurrentImageId(null)
+    }
   }
 
   return (
@@ -103,8 +136,11 @@ function App() {
               onSelect={handleColorSelect}
             />
             <ImageUploader
-              currentImage={backgroundImageUrl}
-              onImageChange={handleImageChange}
+              currentImageId={currentImageId}
+              storedImages={storedImages}
+              onImageSelect={handleImageSelect}
+              onImageAdd={handleImageAdd}
+              onImageRemove={handleImageRemove}
             />
             <ExportButton onExport={download} />
           </div>
