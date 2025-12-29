@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Rule, DEFAULT_RULES, PRESET_COLORS } from './types'
 import { useWallpaperCanvas } from './hooks/useWallpaperCanvas'
 import { RulesList } from './components/RulesList'
@@ -15,6 +15,16 @@ function App() {
   const [textColor, setTextColor] = useState(PRESET_COLORS[0].text)
   const [backgroundImage, setBackgroundImage] = useState<HTMLImageElement | null>(null)
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null)
+
+  // Load default background image on mount
+  useEffect(() => {
+    const img = new Image()
+    img.onload = () => {
+      setBackgroundImage(img)
+      setBackgroundImageUrl('/iphone_sample.png')
+    }
+    img.src = '/iphone_sample.png'
+  }, [])
 
   const canvasOptions = useMemo(
     () => ({ title, rules, backgroundColor, textColor, backgroundImage }),
