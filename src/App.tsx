@@ -10,20 +10,69 @@ import { TitleEditor } from './components/TitleEditor'
 import { ImageUploader, StoredImage } from './components/ImageUploader'
 import { PositionSelector } from './components/PositionSelector'
 
+const STORAGE_KEY = 'myrules-saved-data'
+
+interface SavedData {
+  title: string
+  rules: Rule[]
+  titlePosition: TitlePosition
+  backgroundColor: string
+  textColor: string
+}
+
+function loadSavedData(): SavedData | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (e) {
+    console.error('Failed to load saved data:', e)
+  }
+  return null
+}
+
 function App() {
-  const [title, setTitle] = useState('My Rules')
-  const [rules, setRules] = useState<Rule[]>(DEFAULT_RULES)
-  const [backgroundColor, setBackgroundColor] = useState(PRESET_COLORS[0].bg)
-  const [textColor, setTextColor] = useState(PRESET_COLORS[0].text)
+  const savedData = loadSavedData()
+
+  const [title, setTitle] = useState(savedData?.title ?? 'My Rules')
+  const [rules, setRules] = useState<Rule[]>(savedData?.rules ?? DEFAULT_RULES)
+  const [backgroundColor, setBackgroundColor] = useState(savedData?.backgroundColor ?? PRESET_COLORS[0].bg)
+  const [textColor, setTextColor] = useState(savedData?.textColor ?? PRESET_COLORS[0].text)
   const [storedImages, setStoredImages] = useState<StoredImage[]>([])
   const [currentImageId, setCurrentImageId] = useState<string | null>(null)
-  const [titlePosition, setTitlePosition] = useState<TitlePosition>('high')
+  const [titlePosition, setTitlePosition] = useState<TitlePosition>(savedData?.titlePosition ?? 'high')
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | null>(null)
 
   // Get current background image element
   const backgroundImage = useMemo(() => {
     if (!currentImageId) return null
     return storedImages.find((img) => img.id === currentImageId)?.element ?? null
   }, [currentImageId, storedImages])
+
+  // Auto-save to localStorage
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSaveStatus('saving')
+      try {
+        const dataToSave: SavedData = {
+          title,
+          rules,
+          titlePosition,
+          backgroundColor,
+          textColor,
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus(null), 2000)
+      } catch (e) {
+        console.error('Failed to save:', e)
+        setSaveStatus(null)
+      }
+    }, 500) // Debounce saves by 500ms
+
+    return () => clearTimeout(timeoutId)
+  }, [title, rules, titlePosition, backgroundColor, textColor])
 
   // Load default background images on mount
   useEffect(() => {
@@ -115,9 +164,25 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 py-4">
-        <div className="max-w-6xl mx-auto px-4">
-          <h1 className="text-2xl font-bold text-gray-900">MyRules</h1>
-          <p className="text-sm text-gray-600">Create your personal rules wallpaper</p>
+        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">MyRules</h1>
+            <p className="text-sm text-gray-600">Create your personal rules wallpaper</p>
+          </div>
+          {saveStatus && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              {saveStatus === 'saving' ? (
+                <span>Saving...</span>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Saved</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
