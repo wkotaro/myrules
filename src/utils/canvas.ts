@@ -1,11 +1,14 @@
 import { Rule, WALLPAPER_WIDTH, WALLPAPER_HEIGHT } from '../types'
 
+export type TitlePosition = 'high' | 'middle' | 'low'
+
 interface DrawOptions {
   title: string
   rules: Rule[]
   backgroundColor: string
   textColor: string
   backgroundImage?: HTMLImageElement | null
+  titlePosition?: TitlePosition
 }
 
 function wrapText(
@@ -40,7 +43,7 @@ export function drawWallpaper(
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  const { title, rules, backgroundColor, textColor, backgroundImage } = options
+  const { title, rules, backgroundColor, textColor, backgroundImage, titlePosition = 'high' } = options
   const width = WALLPAPER_WIDTH
   const height = WALLPAPER_HEIGHT
 
@@ -78,10 +81,11 @@ export function drawWallpaper(
   ctx.fillStyle = textColor
   ctx.textAlign = 'center'
 
-  // Draw title (positioned below iPhone lock screen clock)
+  // Draw title (positioned based on titlePosition setting)
   const titleFontSize = 90
   ctx.font = `bold ${titleFontSize}px system-ui, -apple-system, sans-serif`
-  const titleY = height * 0.35
+  const positionMap = { high: 0.35, middle: 0.45, low: 0.55 }
+  const titleY = height * positionMap[titlePosition]
   ctx.fillText(title.toUpperCase(), width / 2, titleY)
 
   // Draw rules

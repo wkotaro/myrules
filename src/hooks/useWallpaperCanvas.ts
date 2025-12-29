@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { Rule } from '../types'
-import { drawWallpaper, downloadWallpaper } from '../utils/canvas'
+import { drawWallpaper, downloadWallpaper, TitlePosition } from '../utils/canvas'
 
 interface UseWallpaperCanvasOptions {
   title: string
@@ -8,6 +8,7 @@ interface UseWallpaperCanvasOptions {
   backgroundColor: string
   textColor: string
   backgroundImage?: HTMLImageElement | null
+  titlePosition?: TitlePosition
 }
 
 export function useWallpaperCanvas(options: UseWallpaperCanvasOptions) {

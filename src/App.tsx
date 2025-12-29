@@ -1,12 +1,14 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Rule, DEFAULT_RULES, PRESET_COLORS } from './types'
 import { useWallpaperCanvas } from './hooks/useWallpaperCanvas'
+import { TitlePosition } from './utils/canvas'
 import { RulesList } from './components/RulesList'
 import { ColorPicker } from './components/ColorPicker'
 import { Preview } from './components/Preview'
 import { ExportButton } from './components/ExportButton'
 import { TitleEditor } from './components/TitleEditor'
 import { ImageUploader, StoredImage } from './components/ImageUploader'
+import { PositionSelector } from './components/PositionSelector'
 
 function App() {
   const [title, setTitle] = useState('My Rules')
@@ -15,6 +17,7 @@ function App() {
   const [textColor, setTextColor] = useState(PRESET_COLORS[0].text)
   const [storedImages, setStoredImages] = useState<StoredImage[]>([])
   const [currentImageId, setCurrentImageId] = useState<string | null>(null)
+  const [titlePosition, setTitlePosition] = useState<TitlePosition>('high')
 
   // Get current background image element
   const backgroundImage = useMemo(() => {
@@ -50,8 +53,8 @@ function App() {
   }, [])
 
   const canvasOptions = useMemo(
-    () => ({ title, rules, backgroundColor, textColor, backgroundImage }),
-    [title, rules, backgroundColor, textColor, backgroundImage]
+    () => ({ title, rules, backgroundColor, textColor, backgroundImage, titlePosition }),
+    [title, rules, backgroundColor, textColor, backgroundImage, titlePosition]
   )
 
   const { canvasRef, download } = useWallpaperCanvas(canvasOptions)
@@ -123,6 +126,7 @@ function App() {
           {/* Editor Panel */}
           <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <TitleEditor title={title} onChange={setTitle} />
+            <PositionSelector position={titlePosition} onChange={setTitlePosition} />
             <RulesList
               rules={rules}
               onUpdate={handleUpdateRule}
