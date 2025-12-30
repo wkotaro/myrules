@@ -26,6 +26,33 @@ src/
 - `src/utils/canvas.ts` - Wallpaper drawing logic (text wrapping, layout)
 - `src/hooks/useWallpaperCanvas.ts` - Canvas hook for preview and export
 - `src/types/index.ts` - Rule interface, wallpaper dimensions, preset colors
+- `src/components/ImageUploader.tsx` - Background image upload and gallery
+- `src/components/PositionSelector.tsx` - Title vertical position selector
+
+## Features
+
+### Background Images
+- Upload custom images or select from 3 default samples
+- Images render in "cover" mode with center alignment
+- Auto text color detection based on image brightness
+
+### Title Position
+- Three vertical positions: High (35%), Middle (45%), Low (55%)
+- Adjusts where title and rules start on the wallpaper
+
+### Auto-Save
+- Data persists to `localStorage` (key: `myrules-saved-data`)
+- Debounced save (500ms delay)
+- Visual feedback: "Saving..." / "Saved" indicator
+
+## Default Assets
+
+```
+public/
+├── iphone_sample.jpg   # Default background 1
+├── iphone_sample2.jpg  # Default background 2
+└── iphone_sample3.jpg  # Default background 3
+```
 
 ## Wallpaper Specs
 

@@ -77,9 +77,9 @@ function App() {
   // Load default background images on mount
   useEffect(() => {
     const defaultImages = [
-      { id: 'default1', src: '/iphone_sample.png' },
-      { id: 'default2', src: '/iphone_sample2.png' },
-      { id: 'default3', src: '/iphone_sample3.png' },
+      { id: 'default1', src: '/iphone_sample.jpg' },
+      { id: 'default2', src: '/iphone_sample2.jpg' },
+      { id: 'default3', src: '/iphone_sample3.jpg' },
     ]
 
     const loadedImages: StoredImage[] = []
