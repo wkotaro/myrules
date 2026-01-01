@@ -1,4 +1,4 @@
-import { Rule, WALLPAPER_WIDTH, WALLPAPER_HEIGHT } from '../types'
+import { Rule, WALLPAPER_WIDTH, WALLPAPER_HEIGHT, WritingMode, JAPANESE_NUMERALS } from '../types'
 
 export type TitlePosition = 'high' | 'middle' | 'low'
 
@@ -9,6 +9,7 @@ interface DrawOptions {
   textColor: string
   backgroundImage?: HTMLImageElement | null
   titlePosition?: TitlePosition
+  writingMode?: WritingMode
 }
 
 function wrapText(
@@ -43,7 +44,7 @@ export function drawWallpaper(
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  const { title, rules, backgroundColor, textColor, backgroundImage, titlePosition = 'high' } = options
+  const { title, rules, backgroundColor, textColor, backgroundImage, titlePosition = 'high', writingMode = 'horizontal' } = options
   const width = WALLPAPER_WIDTH
   const height = WALLPAPER_HEIGHT
 
@@ -79,6 +80,22 @@ export function drawWallpaper(
 
   // Set text properties
   ctx.fillStyle = textColor
+
+  if (writingMode === 'vertical') {
+    drawVerticalWallpaper(ctx, title, rules, titlePosition, width, height)
+  } else {
+    drawHorizontalWallpaper(ctx, title, rules, titlePosition, width, height)
+  }
+}
+
+function drawHorizontalWallpaper(
+  ctx: CanvasRenderingContext2D,
+  title: string,
+  rules: Rule[],
+  titlePosition: TitlePosition,
+  width: number,
+  height: number
+): void {
   ctx.textAlign = 'center'
 
   // Draw title (positioned based on titlePosition setting)
@@ -117,6 +134,66 @@ export function drawWallpaper(
 
     // Add extra spacing between rules
     currentY += lineHeight * 0.3
+  })
+}
+
+function drawVerticalWallpaper(
+  ctx: CanvasRenderingContext2D,
+  title: string,
+  rules: Rule[],
+  titlePosition: TitlePosition,
+  width: number,
+  height: number
+): void {
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+
+  // Draw vertical title in upper-right area
+  const titleFontSize = 90
+  ctx.font = `bold ${titleFontSize}px system-ui, -apple-system, sans-serif`
+  const titleCharHeight = titleFontSize * 1.2
+  const titleX = width * 0.85
+  const titleStartY = height * 0.15
+
+  // Draw title characters vertically
+  const titleText = title.toUpperCase()
+  let titleY = titleStartY
+  for (const char of titleText) {
+    ctx.fillText(char, titleX, titleY)
+    titleY += titleCharHeight
+  }
+
+  // Draw rules vertically (right to left columns)
+  const ruleFontSize = 48
+  const ruleCharHeight = ruleFontSize * 1.3
+  ctx.font = `${ruleFontSize}px system-ui, -apple-system, sans-serif`
+
+  const columnSpacing = 120
+  const rulesPositionMap = { high: 0.20, middle: 0.40, low: 0.60 }
+  const rulesStartY = height * rulesPositionMap[titlePosition]
+  const maxCharsPerColumn = Math.floor((height - rulesStartY - 100) / ruleCharHeight)
+
+  // Calculate starting X position (start from right side)
+  const totalRulesWidth = rules.length * columnSpacing
+  let currentX = (width + totalRulesWidth) / 2 - columnSpacing / 2
+
+  rules.forEach((rule, index) => {
+    // Draw Japanese numeral prefix
+    const prefix = JAPANESE_NUMERALS[index] || `${index + 1}`
+    let currentY = rulesStartY
+
+    ctx.fillText(prefix, currentX, currentY)
+    currentY += ruleCharHeight * 1.2
+
+    // Draw rule text character by character
+    const chars = rule.text.split('')
+    for (let i = 0; i < chars.length && i < maxCharsPerColumn; i++) {
+      ctx.fillText(chars[i], currentX, currentY)
+      currentY += ruleCharHeight
+    }
+
+    // Move to next column (left)
+    currentX -= columnSpacing
   })
 }
 

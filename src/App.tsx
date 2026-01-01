@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Rule, DEFAULT_RULES, PRESET_COLORS } from './types'
+import { Rule, DEFAULT_RULES, PRESET_COLORS, WritingMode } from './types'
 import { useWallpaperCanvas } from './hooks/useWallpaperCanvas'
 import { TitlePosition } from './utils/canvas'
 import { RulesList } from './components/RulesList'
@@ -9,6 +9,7 @@ import { ExportButton } from './components/ExportButton'
 import { TitleEditor } from './components/TitleEditor'
 import { ImageUploader, StoredImage } from './components/ImageUploader'
 import { PositionSelector } from './components/PositionSelector'
+import { WritingModeSelector } from './components/WritingModeSelector'
 
 const STORAGE_KEY = 'myrules-saved-data'
 
@@ -18,6 +19,7 @@ interface SavedData {
   titlePosition: TitlePosition
   backgroundColor: string
   textColor: string
+  writingMode?: WritingMode
 }
 
 function loadSavedData(): SavedData | null {
@@ -42,6 +44,7 @@ function App() {
   const [storedImages, setStoredImages] = useState<StoredImage[]>([])
   const [currentImageId, setCurrentImageId] = useState<string | null>(null)
   const [titlePosition, setTitlePosition] = useState<TitlePosition>(savedData?.titlePosition ?? 'high')
+  const [writingMode, setWritingMode] = useState<WritingMode>(savedData?.writingMode ?? 'horizontal')
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | null>(null)
 
   // Get current background image element
@@ -61,6 +64,7 @@ function App() {
           titlePosition,
           backgroundColor,
           textColor,
+          writingMode,
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave))
         setSaveStatus('saved')
@@ -72,7 +76,7 @@ function App() {
     }, 500) // Debounce saves by 500ms
 
     return () => clearTimeout(timeoutId)
-  }, [title, rules, titlePosition, backgroundColor, textColor])
+  }, [title, rules, titlePosition, backgroundColor, textColor, writingMode])
 
   // Load default background images on mount
   useEffect(() => {
@@ -102,19 +106,28 @@ function App() {
   }, [])
 
   const canvasOptions = useMemo(
-    () => ({ title, rules, backgroundColor, textColor, backgroundImage, titlePosition }),
-    [title, rules, backgroundColor, textColor, backgroundImage, titlePosition]
+    () => ({ title, rules, backgroundColor, textColor, backgroundImage, titlePosition, writingMode }),
+    [title, rules, backgroundColor, textColor, backgroundImage, titlePosition, writingMode]
   )
 
   const { canvasRef, download } = useWallpaperCanvas(canvasOptions)
 
+  const maxRules = writingMode === 'vertical' ? 5 : 10
+
   const handleAddRule = () => {
-    if (rules.length >= 10) return
+    if (rules.length >= maxRules) return
     const newRule: Rule = {
       id: Date.now().toString(),
       text: '',
     }
     setRules([...rules, newRule])
+  }
+
+  const handleWritingModeChange = (mode: WritingMode) => {
+    setWritingMode(mode)
+    if (mode === 'vertical' && rules.length > 5) {
+      setRules(rules.slice(0, 5))
+    }
   }
 
   const handleUpdateRule = (id: string, text: string) => {
@@ -191,9 +204,11 @@ function App() {
           {/* Editor Panel */}
           <div className="space-y-6 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <TitleEditor title={title} onChange={setTitle} />
+            <WritingModeSelector writingMode={writingMode} onChange={handleWritingModeChange} />
             <PositionSelector position={titlePosition} onChange={setTitlePosition} />
             <RulesList
               rules={rules}
+              maxRules={maxRules}
               onUpdate={handleUpdateRule}
               onDelete={handleDeleteRule}
               onAdd={handleAddRule}

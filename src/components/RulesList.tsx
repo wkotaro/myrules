@@ -3,6 +3,7 @@ import { RuleItem } from './RuleItem'
 
 interface RulesListProps {
   rules: Rule[]
+  maxRules: number
   onUpdate: (id: string, text: string) => void
   onDelete: (id: string) => void
   onAdd: () => void
@@ -12,6 +13,7 @@ interface RulesListProps {
 
 export function RulesList({
   rules,
+  maxRules,
   onUpdate,
   onDelete,
   onAdd,
@@ -22,7 +24,7 @@ export function RulesList({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">Your Rules</h2>
-        <span className="text-sm text-gray-500">{rules.length}/10</span>
+        <span className="text-sm text-gray-500">{rules.length}/{maxRules}</span>
       </div>
       <div className="space-y-2">
         {rules.map((rule, index) => (
@@ -38,7 +40,7 @@ export function RulesList({
           />
         ))}
       </div>
-      {rules.length < 10 && (
+      {rules.length < maxRules && (
         <button
           onClick={onAdd}
           className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-colors"

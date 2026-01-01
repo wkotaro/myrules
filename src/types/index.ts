@@ -3,6 +3,10 @@ export interface Rule {
   text: string
 }
 
+export type WritingMode = 'horizontal' | 'vertical'
+
+export const JAPANESE_NUMERALS = ['一', '二', '三', '四', '五']
+
 export interface WallpaperConfig {
   title: string
   rules: Rule[]
