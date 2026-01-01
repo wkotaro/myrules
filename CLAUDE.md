@@ -28,6 +28,7 @@ src/
 - `src/types/index.ts` - Rule interface, wallpaper dimensions, preset colors
 - `src/components/ImageUploader.tsx` - Background image upload and gallery
 - `src/components/PositionSelector.tsx` - Title vertical position selector
+- `src/components/WritingModeSelector.tsx` - Horizontal/vertical writing mode toggle
 
 ## Features
 
@@ -39,6 +40,13 @@ src/
 ### Title Position
 - Three vertical positions: High (35%), Middle (45%), Low (55%)
 - Adjusts where title and rules start on the wallpaper
+
+### Writing Mode
+- **Horizontal**: Default left-to-right text layout (up to 10 rules)
+- **Vertical**: Japanese-style top-to-bottom, right-to-left columns (up to 5 rules)
+  - Title: Vertical text in upper-right area
+  - Rules: Numbered with Japanese numerals (一, 二, 三, 四, 五)
+  - Rule positions: High (20%), Middle (40%), Low (60%) from top
 
 ### Auto-Save
 - Data persists to `localStorage` (key: `myrules-saved-data`)
